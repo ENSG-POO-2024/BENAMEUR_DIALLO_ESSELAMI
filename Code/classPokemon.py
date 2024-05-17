@@ -20,21 +20,6 @@ class Pokemon:
         self.defenseSpecial = defenseSpecial
         self.speed = speed  # Status du Pokémon (par exemple : Healthy, Paralyzed, poison, freezed, etc.)
         self.moves = moves  # Liste des attaques du Pokémon
-
-    def take_damage(self, pv_loss):
-       self.hp -= pv_loss
-       if self.hp < 0:
-           self.hp = 0
-    # à voir si on peut utiliser des potions ou poulet ou pommes  
-
-
-
-    def show_moves(self):
-        print("Moves for", self.name + ":")
-        for i, move in enumerate(self.moves, 1):
-            print(f"{i}. {move}")
-
-
         
   
 class Move:
@@ -44,12 +29,6 @@ class Move:
         self.power = power
         self.is_physical = is_physical
          
-    #     self.effect = effect
-        
-    # def SpDef_drop(SpDef):
-        
-    
-  
   
 class Type:
     def __init__(self, nom, fort_contre=None, faible_contre=None, resistant_contre=None, pas_tres_efficace_contre=None, inefficace_contre=None, immunise_a=None):
@@ -61,8 +40,85 @@ class Type:
         self.pas_tres_efficace_contre = pas_tres_efficace_contre if pas_tres_efficace_contre else []
         self.immunise_a = immunise_a if immunise_a else [] 
     
-"Electrik"
 
+
+def calcul_damage(defenseur ,attaquant, move_choisi):
+    """
+    
+
+    Parameters
+    ----------
+    defenseur : str
+        nom du Pokémon qui subit l'attaque.
+    attaquant : str
+       nom du Pokémon qui réalise l'attaque.
+    move_choisi : str
+        nom de l'attaque.
+
+    Returns 
+    -------
+    int
+        renvoi le montant de dégâts infligés.
+
+    """
+    
+    pv_loss = 0
+    
+    
+    
+    type_1_defenseur = pokedex[defenseur].type_1
+    type_2_defenseur = pokedex[defenseur].type_2
+    type_1_attaquant = pokedex[attaquant].type_1
+    type_2_attaquant = pokedex[attaquant].type_2
+    
+    atk =  pokedex[attaquant].attack
+    defense = pokedex[defenseur].defense
+    spe_atk = pokedex[attaquant].attackSpecial
+    spe_def = pokedex[defenseur].defenseSpecial
+     
+    puiss = moves[move_choisi].power
+    
+    CM=1
+    
+    move_type = moves[move_choisi].move_type
+    
+    if move_type == type_1_attaquant or move_type == type_2_attaquant: 
+        CM = 1.5 #condition pour que l'effet du stab soit pris en compte
+    if move_type in types[type_1_defenseur].faible_contre:
+        CM = CM*2
+    if move_type in types[type_1_defenseur].resistant_contre:
+        CM = CM*0.5
+    if move_type in types[type_1_defenseur].immunise_a:
+        CM = 0
+    if type_2_defenseur != None:    
+        
+        if move_type in types[type_2_defenseur].faible_contre:
+            CM = CM*2
+        if move_type in types[type_2_defenseur].resistant_contre:
+            CM = CM*0.5
+        if move_type in types[type_2_defenseur].immunise_a:
+            CM = 0
+    
+    if CM == 0:
+        pv_loss = 0
+        print("C'est inefficace!")
+        
+    if moves[move_choisi].is_physical == True: 
+        pv_loss = (((((50*0.4 +2)*atk*puiss)/defense)/50)+2)*CM #formule pour une attaque physique
+    
+    elif moves[move_choisi].is_physical == False:
+       pv_loss = (((((50*0.4 +2)*spe_atk*puiss)/spe_def)/50)+2)*CM #formule pour une attaque spéciale
+    
+    if CM > 2:
+        print("C'est super efficace!")
+    elif CM < 1 and CM > 0:
+        print("Ce n'est pas très efficace")
+    
+    return round(pv_loss)
+
+
+
+#Définition des dicotionnaires
 types = {
     "Normal": Type("Normal", faible_contre=["Combat"], pas_tres_efficace_contre=["Roche", "Acier"], inefficace_contre=["Spectre"], immunise_a=["Spectre"]),
     "Feu": Type("Feu", faible_contre=["Eau", "Roche", "Sol"], resistant_contre=["Feu", "Plante", "Glace", "Insecte", "Fée"], fort_contre=["Plante", "Glace", "Insecte", "Acier"], pas_tres_efficace_contre=["Feu", "Eau", "Roche", "Dragon"]),
@@ -85,67 +141,6 @@ types = {
 }
 
 
-
-
-def calcul_damage(defenseur ,attaquant, move_choisi):
-    
-    pv_loss = 0
-    
-    
-    
-    type_1_defenseur = pokedex[defenseur].type_1
-    type_2_defenseur = pokedex[defenseur].type_2
-    type_1_attaquant = pokedex[attaquant].type_1
-    type_2_attaquant = pokedex[attaquant].type_2
-    
-    atk =  pokedex[attaquant].attack
-    defense = pokedex[defenseur].defense
-    spe_atk = pokedex[attaquant].attackSpecial
-    spe_def = pokedex[defenseur].defenseSpecial
-     
-    puiss = moves[move_choisi].power
-    
-    CM=1
-    
-    move_type = moves[move_choisi].move_type
-    
-    if move_type == type_1_attaquant or move_type == type_2_attaquant:
-        CM = 1.5
-    if move_type in types[type_1_defenseur].faible_contre:
-        CM = CM*2
-    if move_type in types[type_1_defenseur].resistant_contre:
-        CM = CM*0.5
-    if move_type in types[type_1_defenseur].immunise_a:
-        CM = 0
-    if type_2_defenseur != None:    
-        
-        if move_type in types[type_2_defenseur].faible_contre:
-            CM = CM*2
-        if move_type in types[type_2_defenseur].resistant_contre:
-            CM = CM*0.5
-        if move_type in types[type_2_defenseur].immunise_a:
-            CM = 0
-    
-    if CM == 0:
-        pv_loss = 0
-        print("C'est inefficace!")
-        
-    if moves[move_choisi].is_physical == True:
-        pv_loss = (((((50*0.4 +2)*atk*puiss)/defense)/50)+2)*CM
-    
-    elif moves[move_choisi].is_physical == False:
-       pv_loss = (((((50*0.4 +2)*spe_atk*puiss)/spe_def)/50)+2)*CM 
-    
-    if CM > 2:
-        print("C'est super efficace!")
-    elif CM < 1 and CM > 0:
-        print("Ce n'est pas très efficace")
-    
-    return round(pv_loss)
-
-
-
-#Définition des moves
 
 moves = {
     "Charge": Move("Charge", "Normal", 50),
@@ -324,5 +319,5 @@ pokedex = {
     "Dracolosse": Pokemon("Dracolosse", "Dragon", "Vol", 166, 154, 115, 120, 120, 100, [moves["Lance-Flammes"], moves["Draco-Choc"]]),
     "Mewtwo": Pokemon("Mewtwo", "Psy", None, 181, 130, 110, 174, 110, 150, [moves["Ball'Ombre"], moves["Psyko"]]),
     "Mew": Pokemon("Mew", "Psy", None, 175, 120, 120, 120, 120, 120, [moves["Laser Glace"], moves["Psyko"]]),
-    "Feuforêve": Pokemon("Feuforêve", "Spectre", None, 135, 80, 80, 105, 105, 105, [moves["Laser Glace"], moves["Psyko"]]),
+    "Feuforêve": Pokemon("Feuforêve", "Spectre", None, 135, 80, 80, 105, 105, 105, [moves["Ball'Ombre"], moves["Psyko"]]),
     }

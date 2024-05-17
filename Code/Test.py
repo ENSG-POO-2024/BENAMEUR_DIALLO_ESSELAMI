@@ -14,6 +14,15 @@ from PyQt5.QtGui import QPixmap
 choix_pokemon = None
 
 def starter():
+    """
+    permet de choisir son starter
+
+    Returns
+    -------
+    str
+        nom du starter.
+
+    """
     global choix_pokemon  # Utiliser la variable globale
 
     base_path = os.path.dirname(__file__)  # Répertoire contenant le script

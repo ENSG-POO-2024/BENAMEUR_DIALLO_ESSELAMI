@@ -66,18 +66,18 @@ class MapGame(QMainWindow):
         self.setGeometry(100, 100, 760, 1260)
 
         self.map_label = QLabel(self)
-        self.map_label.setGeometry(0, 0, 760, 1260)  # Définir la taille de la fenêtre comme celle de l'image
+        self.map_label.setGeometry(0, 0, 760, 1260)  
         base_path_map = os.path.dirname(__file__)
         map_image = os.path.join(base_path_map, "asset", "map.png")
-        self.map_label.setPixmap(QPixmap(map_image))  # Remplacez "map.png" par le chemin de votre image de carte
+        self.map_label.setPixmap(QPixmap(map_image))  
         
         self.character = Character(self)
 
-        self.setFocusPolicy(Qt.StrongFocus)  # Activer la réception des événements de clavier
+        self.setFocusPolicy(Qt.StrongFocus)  # Active la réception des événements de clavier
 
     def keyPressEvent(self, event):
         time.sleep(0.15)
-        self.character.keyPressEvent(event) # Transmettre les événements de clavier à la classe Character
+        self.character.keyPressEvent(event) # Transmet les événements de clavier à la classe Character
         
     
     
